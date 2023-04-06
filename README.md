@@ -12,50 +12,54 @@ Spring Boot Examples
 
 ## 多版本JDK构建
 
-就目前而言，大多数模块都是基于JDK 8/17和Spring Boot 2.7.5构建和运行。此外，还有一些项目是基于JDK 17/19和Spring Boot 3构建的。我们通过Maven ToolChains工具来保证这些模块能够使用单独的JDK构建。
+就目前而言，大多数模块都是基于JDK 8/17和Spring Boot 2.7.5构建和运行。此外，还有一些项目是基于JDK 17/19和Spring Boot 3.0.2构建的。我们通过Maven ToolChains工具来保证这些模块能够使用单独的JDK构建。
 
-首先，你需要同时下载这些版本的JDK。然后配置Maven ToolChains，在你的用户目录下的.m2文件夹中添加一个toolchains.xml文件：
+首先，你需要同时下载这些版本(8、17、19)的JDK。然后配置Maven ToolChains，在你用户目录下的.m2文件夹中添加一个toolchains.xml文件：
 
 <img src="assets/img_1.png" align="left">
 
-然后指定以下内容(务必将每个版本的<jdkHome\>标签指向你本地该JDK版本的位置)：
+然后指定以下内容(务必将每个版本的<jdkHome\>指向你本地该JDK版本的位置，例如D:\\\xxx\\\jdk-17)：
 
 ```xml
-<toolchain>
-    <type>jdk</type>
-    <provides>
-        <version>17</version>
-        <vendor>adopt</vendor>
-    </provides>
-    <configuration>
-        <jdkHome>your jdk 17 path</jdkHome>
-    </configuration>
-</toolchain>
-<toolchain>
-    <type>jdk</type>
-    <provides>
-        <version>19</version>
-        <vendor>adopt</vendor>
-    </provides>
-    <configuration>
-        <jdkHome>your jdk 19 path</jdkHome>
-    </configuration>
-</toolchain>
-<toolchain>
-    <type>jdk</type>
-    <provides>
-        <version>8</version>
-        <vendor>adopt</vendor>
-    </provides>
-    <configuration>
-        <jdkHome>your jdk 8 path</jdkHome>
-    </configuration>
-</toolchain>
+<?xml version="1.0" encoding="UTF-8"?>
+<toolchains xmlns="http://maven.apache.org/TOOLCHAINS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/TOOLCHAINS/1.1.0 http://maven.apache.org/xsd/toolchains-1.1.0.xsd">
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>17</version>
+            <vendor>adopt</vendor>
+        </provides>
+        <configuration>
+            <jdkHome>your jdk 17 path</jdkHome>
+        </configuration>
+    </toolchain>
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>8</version>
+            <vendor>adopt</vendor>
+        </provides>
+        <configuration>
+            <jdkHome>your jdk 8 path</jdkHome>
+        </configuration>
+    </toolchain>
+    <toolchain>
+        <type>jdk</type>
+        <provides>
+            <version>19</version>
+            <vendor>adopt</vendor>
+        </provides>
+        <configuration>
+            <jdkHome>your jdk 19 path</jdkHome>
+        </configuration>
+    </toolchain>
+</toolchains>
 ```
 
 ## Maven Profiles
 
-我们使用Maven Profile来隔离我们仓库中庞大的项目列表，这些项目大致分为：boot2(Spring Boot 2)、boot3(Spring Boot 3)。接下来，根据我们要执行的测试进一步隔离它们：
+我们使用Maven Profile来隔离Spring Boot 2和3模块列表，这些项目大致分为：boot2(Spring Boot 2)、boot3(Spring Boot 3)。接下来，根据我们要执行的测试进一步隔离它们：
 
 |      Profile      |       包含        |           启用的测试类型           |
 |:-----------------:|:---------------:|:---------------------------:|
