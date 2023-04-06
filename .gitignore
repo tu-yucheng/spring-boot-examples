@@ -73,13 +73,17 @@ transaction.log
 *-shell.log
 
 logs/
-spring-boot-modules/spring-boot-react/frontend/build
-spring-boot-modules/spring-boot-react/frontend/node
-spring-boot-modules/spring-boot-react/frontend/yarn.lock
-spring-boot-modules/spring-boot-properties-3/*.log
+spring-boot-examples/spring-boot-react/frontend/build
+spring-boot-examples/spring-boot-react/frontend/node
+spring-boot-examples/spring-boot-react/frontend/yarn.lock
+spring-boot-examples/spring-boot-properties-3/*.log
+spring-boot-examples/spring-boot-properties-3/*.gz
 
 # SDKMan
 .sdkmanrc
 
 # Localstack
 **/.localstack
+
+#jaxb
+*.xjb

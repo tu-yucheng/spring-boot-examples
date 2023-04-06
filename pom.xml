@@ -456,11 +456,11 @@
 				<module>spring-boot-properties-3</module>
 				<module>spring-boot-properties-migrator-demo</module>
 				<module>spring-boot-property-exp</module>
-				<!--<module>spring-boot-react</module>-->
+				<module>spring-boot-react</module>
 				<module>spring-boot-redis</module>
 				<module>spring-boot-request-params</module>
-				<!--<module>spring-boot-resilience4j</module>-->
-				<!--<module>spring-boot-runtime-1</module>-->
+				<module>spring-boot-resilience4j</module>
+				<module>spring-boot-runtime-1</module>
 				<module>spring-boot-runtime-2</module>
 				<module>spring-boot-security</module>
 				<module>spring-boot-springdoc</module>
@@ -562,11 +562,11 @@
 				<module>spring-boot-properties-3</module>
 				<module>spring-boot-properties-migrator-demo</module>
 				<module>spring-boot-property-exp</module>
-				<!--<module>spring-boot-react</module>-->
+				<module>spring-boot-react</module>
 				<module>spring-boot-redis</module>
 				<module>spring-boot-request-params</module>
-				<!--<module>spring-boot-resilience4j</module>-->
-				<!--<module>spring-boot-runtime-1</module>-->
+				<module>spring-boot-resilience4j</module>
+				<module>spring-boot-runtime-1</module>
 				<module>spring-boot-runtime-2</module>
 				<module>spring-boot-security</module>
 				<module>spring-boot-springdoc</module>
@@ -650,11 +650,11 @@
 				<module>spring-boot-properties-3</module>
 				<module>spring-boot-properties-migrator-demo</module>
 				<module>spring-boot-property-exp</module>
-				<!--<module>spring-boot-react</module>-->
+				<module>spring-boot-react</module>
 				<module>spring-boot-redis</module>
 				<module>spring-boot-request-params</module>
-				<!--<module>spring-boot-resilience4j</module>-->
-				<!--<module>spring-boot-runtime-1</module>-->
+				<module>spring-boot-resilience4j</module>
+				<module>spring-boot-runtime-1</module>
 				<module>spring-boot-runtime-2</module>
 				<module>spring-boot-security</module>
 				<module>spring-boot-springdoc</module>
