@@ -32,6 +32,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+			<version>${h2.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -51,9 +52,6 @@
 	</build>
 
 	<properties>
-		<java.version>17</java.version>
-		<toolchains.java.version>17</toolchains.java.version>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<h2.version>1.4.200</h2.version>
 	</properties>
 </project>

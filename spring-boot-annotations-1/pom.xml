@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-boot-annotations-1</artifactId>
 	<name>spring-boot-annotations-1</name>
+	<packaging>war</packaging>
 
 	<parent>
 		<groupId>cn.tuyucheng.taketoday.spring-boot-examples</groupId>
@@ -52,11 +53,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<properties>
-		<java.version>17</java.version>
-		<toolchains.java.version>17</toolchains.java.version>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
-	</properties>
 </project>

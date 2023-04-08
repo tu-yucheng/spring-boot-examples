@@ -6,6 +6,7 @@
 	<artifactId>spring-boot-caching-1</artifactId>
 	<version>1.0.0</version>
 	<name>spring-boot-caching-1</name>
+	<packaging>war</packaging>
 
 	<parent>
 		<groupId>cn.tuyucheng.taketoday.spring-boot-examples</groupId>
@@ -78,7 +79,6 @@
 	</dependencies>
 
 	<properties>
-		<start-class>cn.tuyucheng.taketoday.cachetest.Application</start-class>
 		<ehcache.version>3.5.2</ehcache.version>
 		<lombok.version>1.18.26</lombok.version>
 	</properties>
