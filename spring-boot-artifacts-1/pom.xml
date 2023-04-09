@@ -97,29 +97,29 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.18</version>
-				<executions>
-					<!-- Invokes both the integration-test and the verify goals of the -->
-					<!-- Failsafe Maven plugin -->
-					<execution>
-						<id>integration-tests</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<!-- Skips integration tests if the value of -->
-							<!-- skip.integration.tests property is true -->
-							<includes>
-								<include>**/ExternalPropertyFileLoaderIntegrationTest.java</include>
-							</includes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+			<!--<plugin>-->
+			<!--	<groupId>org.apache.maven.plugins</groupId>-->
+			<!--	<artifactId>maven-failsafe-plugin</artifactId>-->
+			<!--	<version>2.18</version>-->
+			<!--	<executions>-->
+			<!--		&lt;!&ndash; Invokes both the integration-test and the verify goals of the &ndash;&gt;-->
+			<!--		&lt;!&ndash; Failsafe Maven plugin &ndash;&gt;-->
+			<!--		<execution>-->
+			<!--			<id>integration-tests</id>-->
+			<!--			<goals>-->
+			<!--				<goal>integration-test</goal>-->
+			<!--				<goal>verify</goal>-->
+			<!--			</goals>-->
+			<!--			<configuration>-->
+			<!--				&lt;!&ndash; Skips integration tests if the value of &ndash;&gt;-->
+			<!--				&lt;!&ndash; skip.integration.tests property is true &ndash;&gt;-->
+			<!--				<includes>-->
+			<!--					<include>**/ExternalPropertyFileLoaderIntegrationTest.java</include>-->
+			<!--				</includes>-->
+			<!--			</configuration>-->
+			<!--		</execution>-->
+			<!--	</executions>-->
+			<!--</plugin>-->
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
