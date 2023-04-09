@@ -6,7 +6,7 @@
 
 ## 2. Admin服务器设置
 
-首先，我们需要创建一个简单的Spring Boot Web应用程序并添加以下[Maven依赖](https://search.maven.org/classic/#search|ga|1|spring-boot-admin-starter-server)：
+首先，我们需要创建一个简单的Spring Boot Web应用程序并添加以下[Maven依赖](https://central.sonatype.com/artifact/de.codecentric/spring-boot-admin-starter-server/3.0.2)：
 
 ```xml
 <dependency>
@@ -33,7 +33,7 @@ public class SpringBootAdminServerApplication {
 
 ## 3. 设置客户端
 
-现在，在我们设置Admin服务器之后，我们可以将我们的第一个Spring Boot应用程序注册为客户端。客户端程序必须添加以下[Maven依赖项](https://search.maven.org/classic/#search|ga|1|spring-boot-admin-starter-client)：
+现在，在我们设置了Admin服务器之后，我们可以将我们的第一个Spring Boot应用程序注册为客户端。客户端程序必须添加以下[Maven依赖项](https://central.sonatype.com/artifact/de.codecentric/spring-boot-admin-starter-client/3.0.2)：
 
 ```xml
 <dependency>
@@ -51,10 +51,10 @@ spring.boot.admin.client.url=http://localhost:8080
 
 **从Spring Boot 2开始，默认情况下不会公开除health和info之外的端点**。
 
-我们可以通过以下配置公开所有端点：
+让我们公开所有端点：
 
 ```properties
-management.endpoints.web.exposure.include=
+management.endpoints.web.exposure.include=*
 management.endpoint.health.show-details=always
 ```
 
@@ -62,7 +62,7 @@ management.endpoint.health.show-details=always
 
 **Spring Boot Admin服务器可以访问应用程序的敏感端点，因此建议我们为Admin和客户端应用程序添加一些安全配置**。
 
-首先，我们重点介绍如何配置Admin服务器的安全性，首先必须添加以下[Maven依赖](https://search.maven.org/classic/#search|ga|1|g%3A"org.springframework.boot" AND a%3A"spring-boot-starter-security")：
+首先，我们将重点介绍如何配置Admin服务器的安全性。我们必须添加以下[Maven依赖](https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-security/3.0.3)：
 
 ```xml
 <dependency>
@@ -79,7 +79,7 @@ management.endpoint.health.show-details=always
 
 这将启用安全性并向Admin应用程序添加登录界面。
 
-接下来，我们添加一个安全配置类，如下所示：
+接下来，我们将添加一个安全配置类，如下所示：
 
 ```java
 @Configuration
@@ -98,31 +98,31 @@ public class WebSecurityConfig {
         successHandler.setDefaultTargetUrl(this.adminServer.getContextPath() + "/");
 
         http.authorizeRequests()
-                .antMatchers(this.adminServer.getContextPath() + "/assets/").permitAll()
-                .antMatchers(this.adminServer.getContextPath() + "/login").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .loginPage(this.adminServer.getContextPath() + "/login")
-                .successHandler(successHandler)
-                .and()
-                .logout()
-                .logoutUrl(this.adminServer.getContextPath() + "/logout")
-                .and()
-                .httpBasic()
-                .and()
-                .csrf()
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers(
-                        new AntPathRequestMatcher(this.adminServer.getContextPath() +
-                                "/instances", HttpMethod.POST.toString()),
-                        new AntPathRequestMatcher(this.adminServer.getContextPath() +
-                                "/instances/", HttpMethod.DELETE.toString()),
-                        new AntPathRequestMatcher(this.adminServer.getContextPath() + "/actuator/"))
-                .and()
-                .rememberMe()
-                .key(UUID.randomUUID().toString())
-                .tokenValiditySeconds(1209600);
+              .antMatchers(this.adminServer.getContextPath() + "/assets/**").permitAll()
+              .antMatchers(this.adminServer.getContextPath() + "/login").permitAll()
+              .anyRequest().authenticated()
+              .and()
+              .formLogin()
+              .loginPage(this.adminServer.getContextPath() + "/login")
+              .successHandler(successHandler)
+              .and()
+              .logout()
+              .logoutUrl(this.adminServer.getContextPath() + "/logout")
+              .and()
+              .httpBasic()
+              .and()
+              .csrf()
+              .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+              .ignoringRequestMatchers(
+                    new AntPathRequestMatcher(this.adminServer.getContextPath() +
+                          "/instances", HttpMethod.POST.toString()),
+                    new AntPathRequestMatcher(this.adminServer.getContextPath() +
+                          "/instances/*", HttpMethod.DELETE.toString()),
+                    new AntPathRequestMatcher(this.adminServer.getContextPath() + "/actuator/**"))
+              .and()
+              .rememberMe()
+              .key(UUID.randomUUID().toString())
+              .tokenValiditySeconds(1209600);
         return http.build();
     }
 }
@@ -137,9 +137,9 @@ spring.boot.admin.client.username=admin
 spring.boot.admin.client.password=admin
 ```
 
-我们正处于保护Admin服务器的位置。在生产系统中，我们试图监控的应用程序自然会受到保护。因此，我们也会为客户端添加安全性，我们会在管理服务器的UI界面中注意到客户端信息不再可用。
+我们正处于保护Admin服务器的位置。在生产系统中，我们试图监控的应用程序自然会受到保护。因此，我们也会为客户端添加安全性-我们会在管理服务器的UI界面中注意到客户端信息不再可用。
 
-我们必须添加一些我们将发送到Admin服务器的元数据，服务器使用此信息连接到客户端的端点：
+我们必须添加一些我们将发送到Admin服务器的元数据。服务器使用此信息连接到客户端的端点：
 
 ```properties
 spring.security.user.name=client
@@ -148,11 +148,11 @@ spring.boot.admin.client.instance.metadata.user.name=${spring.security.user.name
 spring.boot.admin.client.instance.metadata.user.password=${spring.security.user.password}
 ```
 
-通过HTTP发送凭据当然不安全，因此通信需要通过HTTPS。
+当然，通过HTTP发送凭据并不安全-因此通信需要通过HTTPS。
 
 ## 5. 监控和管理功能
 
-可以将Spring Boot Admin配置为仅显示我们认为有用的信息，我们只需要更改默认配置并添加我们自己需要的指标：
+可以将Spring Boot Admin配置为仅显示我们认为有用的信息。我们只需要更改默认配置并添加我们自己需要的指标：
 
 ```properties
 spring.boot.admin.routes.endpoints=env, metrics, trace, jolokia, info, configprops
@@ -160,7 +160,7 @@ spring.boot.admin.routes.endpoints=env, metrics, trace, jolokia, info, configpro
 
 随着我们的深入，我们将看到还有一些其他功能可以探索。我们正在谈论使用Jolokia的JMX bean管理以及Loglevel管理。
 
-Spring Boot Admin还支持使用Hazelcast进行集群，我们只需要添加以下[Maven依赖](https://search.maven.org/classic/#search|ga|1|g%3A"com.hazelcast" AND a%3A"hazelcast")，让自动配置完成剩下的工作：
+Spring Boot Admin还支持使用Hazelcast进行集群复制，我们只需要添加以下[Maven依赖](https://central.sonatype.com/artifact/com.hazelcast/hazelcast/5.3.0-BETA-1)，让自动配置完成剩下的工作：
 
 ```xml
 <dependency>
@@ -179,16 +179,16 @@ public class HazelcastConfig {
     @Bean
     public Config hazelcast() {
         MapConfig eventStoreMap = new MapConfig("spring-boot-admin-event-store")
-                .setInMemoryFormat(InMemoryFormat.OBJECT)
-                .setBackupCount(1)
-                .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.NONE))
-                .setMergePolicyConfig(new MergePolicyConfig(PutIfAbsentMergePolicy.class.getName(), 100));
+              .setInMemoryFormat(InMemoryFormat.OBJECT)
+              .setBackupCount(1)
+              .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.NONE))
+              .setMergePolicyConfig(new MergePolicyConfig(PutIfAbsentMergePolicy.class.getName(), 100));
 
         MapConfig sentNotificationsMap = new MapConfig("spring-boot-admin-application-store")
-                .setInMemoryFormat(InMemoryFormat.OBJECT)
-                .setBackupCount(1)
-                .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.LRU))
-                .setMergePolicyConfig(new MergePolicyConfig(PutIfAbsentMergePolicy.class.getName(), 100));
+              .setInMemoryFormat(InMemoryFormat.OBJECT)
+              .setBackupCount(1)
+              .setEvictionConfig(new EvictionConfig().setEvictionPolicy(EvictionPolicy.LRU))
+              .setMergePolicyConfig(new MergePolicyConfig(PutIfAbsentMergePolicy.class.getName(), 100));
 
         Config config = new Config();
         config.addMapConfig(eventStoreMap);
@@ -196,12 +196,12 @@ public class HazelcastConfig {
         config.setProperty("hazelcast.jmx", "true");
 
         config.getNetworkConfig()
-                .getJoin()
-                .getMulticastConfig()
-                .setEnabled(false);
+              .getJoin()
+              .getMulticastConfig()
+              .setEnabled(false);
         TcpIpConfig tcpIpConfig = config.getNetworkConfig()
-                .getJoin()
-                .getTcpIpConfig();
+              .getJoin()
+              .getTcpIpConfig();
         tcpIpConfig.setEnabled(true);
         tcpIpConfig.setMembers(Collections.singletonList("127.0.0.1"));
         return config;
@@ -222,7 +222,7 @@ public class HazelcastConfig {
 
 ### 6.1 电子邮件通知
 
-我们将首先关注为我们的Admin服务器配置邮件通知。为此，我们必须添加[mail starter依赖](https://search.maven.org/classic/#search|ga|1|g%3A"org.springframework.boot" AND a%3A"spring-boot-starter-mail")，如下所示：
+我们将首先重点介绍如何为Admin服务器配置邮件通知。为此，我们必须添加[mail启动器依赖](https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-mail/3.0.3)，如下所示：
 
 ```xml
 <dependency>
@@ -241,7 +241,7 @@ spring.mail.password=smtp_password
 spring.boot.admin.notify.mail.to=admin@example.com
 ```
 
-现在，每当我们的注册客户将其状态从UP更改为OFFLINE或其他状态时，都会向上面配置的地址发送一封电子邮件。对于其他通知程序，配置类似。
+现在，每当我们的注册客户端将其状态从UP更改为OFFLINE或其他状态时，都会向上面配置的地址发送一封电子邮件。对于其他通知程序，配置类似。
 
 ### 6.2 Hipchat通知
 
@@ -296,4 +296,6 @@ public class NotifierConfiguration {
 
 ## 7. 总结
 
-本介绍教程涵盖了使用Spring Boot Admin监控和管理其Spring Boot应用程序所必须执行的简单步骤。自动配置允许我们仅添加一些次要配置，并在最后拥有一个功能齐全的管理服务器。
+本介绍教程涵盖了使用Spring Boot Admin监控和管理其Spring Boot应用程序所必须执行的简单步骤。
+
+自动配置允许我们仅添加一些次要配置，并在最后拥有一个功能齐全的管理服务器。

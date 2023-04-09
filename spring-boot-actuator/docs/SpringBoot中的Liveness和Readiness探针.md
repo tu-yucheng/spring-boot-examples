@@ -1,14 +1,14 @@
 ## 1. 概述
 
-在本教程中，我们将了解[Spring Boot 2.3](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.3-Release-Notes)如何与[Kubernetes探针]()集成，以创建更加友好的云原生体验。
+在本教程中，我们将了解[Spring Boot 2.3](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.3-Release-Notes)如何与[Kubernetes探针](https://www.baeldung.com/spring-boot-kubernetes-self-healing-apps)集成，以创建更加友好的云原生体验。
 
-首先，我们将从Kubernetes探针的一些背景知识开始，然后看看Spring Boot 2.3如何支持这些探针。
+首先，我们将从Kubernetes探针的一些背景知识开始。然后看看Spring Boot 2.3如何支持这些探针。
 
 ## 2. Kubernetes探针
 
 当使用Kubernetes作为我们的编排平台时，每个节点中的[kubelet](https://kubernetes.io/docs/admin/kubelet/)负责保持该节点中的pod健康。
 
-例如，有时我们的应用程序可能需要一点时间才能接受请求，kubelet可以确保应用程序仅在准备就绪时才收到请求。此外，如果pod的主进程因任何原因崩溃，kubelet将重新启动容器。
+例如，有时我们的应用程序可能需要一点时间才能接受请求。kubelet可以确保应用程序仅在准备就绪时才收到请求。此外，如果pod的主进程因任何原因崩溃，kubelet将重新启动容器。
 
 为了履行这些职责，Kubernetes有两个探针：liveness探针和readiness探针。
 
@@ -18,9 +18,9 @@
 
 现在我们已经熟悉了这些概念，让我们看看Spring Boot集成是如何工作的。
 
-## 3. Actuator的就绪和活动状态
+## 3. Actuator的活跃性和就绪性
 
-从Spring Boot 2.3开始，[LivenessStateHealthIndicator](https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/availability/LivenessStateHealthIndicator.java)和[ReadinessStateHealthIndicator](https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/availability/ReadinessStateHealthIndicator.java)类将公开应用程序的活跃性和就绪状态，当我们将应用程序部署到Kubernetes时，Spring Boot会自动注册这些健康指标。
+从Spring Boot 2.3开始，[LivenessStateHealthIndicator](https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/availability/LivenessStateHealthIndicator.java)和[ReadinessStateHealthIndicator](https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/availability/ReadinessStateHealthIndicator.java)类将公开应用程序的活跃性和就绪状态。当我们将应用程序部署到Kubernetes时，Spring Boot会自动注册这些健康指标。
 
 **因此，我们可以分别使用/actuator/health/liveness和/actuator/health/readiness端点作为我们的liveness和readiness探针**。
 
@@ -43,7 +43,7 @@ livenessProbe:
 management.health.probes.enabled=true
 ```
 
-但是，**自Spring Boot 2.3.2起，由于[配置混乱](https://github.com/spring-projects/spring-boot/issues/22107)，此属性已被弃用**。
+但是，**从Spring Boot 2.3.2开始，由于[配置混乱](https://github.com/spring-projects/spring-boot/issues/22107)，此属性已被弃用**。
 
 如果我们使用Spring Boot 2.3.2，我们可以使用新属性来启用liveness和readiness探针：
 
@@ -68,11 +68,11 @@ Spring Boot使用两个枚举来封装不同的就绪状态和活动状态。对
 以下是Spring中应用程序生命周期事件方面的就绪性和活动状态的变化方式：
 
 1.  注册监听器和初始化器
-2.  准备环境
+2.  准备Environment
 3.  准备ApplicationContext
 4.  加载bean定义
 5.  **将活动状态更改为CORRECT**
-6.  调用应用程序和命令行运行器
+6.  调用应用程序和命令行运行器(CommandLineRunner)
 7.  **将就绪状态更改为ACCEPTING_TRAFFIC**
 
 一旦应用程序启动并运行，我们(和Spring本身)就可以通过发布适当的[AvailabilityChangeEvents](https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/availability/AvailabilityChangeEvent.java)来更改这些状态。
@@ -85,15 +85,15 @@ Spring Boot使用两个枚举来封装不同的就绪状态和活动状态。对
 @Autowired private ApplicationAvailability applicationAvailability;
 ```
 
-然后我们可以如下使用它：
+然后我们可以按如下方式使用它：
 
 ```java
 assertThat(applicationAvailability.getLivenessState())
-      .isEqualTo(LivenessState.CORRECT);
+    .isEqualTo(LivenessState.CORRECT);
 assertThat(applicationAvailability.getReadinessState())
-      .isEqualTo(ReadinessState.ACCEPTING_TRAFFIC);
+    .isEqualTo(ReadinessState.ACCEPTING_TRAFFIC);
 assertThat(applicationAvailability.getState(ReadinessState.class))
-      .isEqualTo(ReadinessState.ACCEPTING_TRAFFIC);
+    .isEqualTo(ReadinessState.ACCEPTING_TRAFFIC);
 ```
 
 ### 4.1 更新可用性状态
@@ -102,18 +102,18 @@ assertThat(applicationAvailability.getState(ReadinessState.class))
 
 ```java
 assertThat(applicationAvailability.getLivenessState())
-      .isEqualTo(LivenessState.CORRECT);
+    .isEqualTo(LivenessState.CORRECT);
 mockMvc.perform(get("/actuator/health/liveness"))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("UP"));
+    .andExpect(status().isOk())
+    .andExpect(jsonPath("$.status").value("UP"));
 
 AvailabilityChangeEvent.publish(context, LivenessState.BROKEN);
 
 assertThat(applicationAvailability.getLivenessState())
-      .isEqualTo(LivenessState.BROKEN);
+    .isEqualTo(LivenessState.BROKEN);
 mockMvc.perform(get("/actuator/health/liveness"))
-      .andExpect(status().isServiceUnavailable())
-      .andExpect(jsonPath("$.status").value("DOWN"));
+    .andExpect(status().isServiceUnavailable())
+    .andExpect(jsonPath("$.status").value("DOWN"));
 ```
 
 如上所示，在发布任何事件之前，/actuator/health/liveness端点会返回具有以下JSON的200 OK响应：
@@ -132,22 +132,22 @@ mockMvc.perform(get("/actuator/health/liveness"))
 }
 ```
 
-当我们更改为REFUSING_TRAFFIC就绪状态时，状态值将为 OUT_OF_SERVICE：
+当我们更改为REFUSING_TRAFFIC就绪状态时，status值将为OUT_OF_SERVICE：
 
 ```java
 assertThat(applicationAvailability.getReadinessState())
-      .isEqualTo(ReadinessState.ACCEPTING_TRAFFIC);
+    .isEqualTo(ReadinessState.ACCEPTING_TRAFFIC);
 mockMvc.perform(get("/actuator/health/readiness"))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("UP"));
+    .andExpect(status().isOk())
+    .andExpect(jsonPath("$.status").value("UP"));
 
 AvailabilityChangeEvent.publish(context, ReadinessState.REFUSING_TRAFFIC);
 
 assertThat(applicationAvailability.getReadinessState())
-      .isEqualTo(ReadinessState.REFUSING_TRAFFIC);
+    .isEqualTo(ReadinessState.REFUSING_TRAFFIC);
 mockMvc.perform(get("/actuator/health/readiness"))
-      .andExpect(status().isServiceUnavailable())
-      .andExpect(jsonPath("$.status").value("OUT_OF_SERVICE"));
+    .andExpect(status().isServiceUnavailable())
+    .andExpect(jsonPath("$.status").value("OUT_OF_SERVICE"));
 ```
 
 ### 4.2 监听变化

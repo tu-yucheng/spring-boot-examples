@@ -2,13 +2,15 @@
 
 我们可以使用org.springframework.beans.factory.annotation和org.springframework.context.annotation包中的注解来利用Spring DI的功能。
 
+我们通常将这些称为“Spring核心注解”，在本教程中我们将对其进行回顾。
+
 ## 2. DI相关注解
 
 ### 2.1 @Autowired
 
-**我们可以使用@Autowired来标记Spring将要解析和注入的依赖bean**。我们可以将此注解与构造函数、setter或字段注入一起使用。
+我们可以使用@Autowired来**标记Spring将要解析和注入的依赖bean**。我们可以将此注解与构造函数、setter或字段注入一起使用。
 
-构造注入：
+构造函数注入：
 
 ```java
 class Car {
@@ -45,9 +47,11 @@ class Car {
 
 @Autowired有一个名为required的布尔参数，默认值为true。当找不到合适的bean进行注入时，它会调整Spring的行为。当为true时，抛出异常，否则不会注入任何内容，程序不会抛出异常。
 
-请注意，如果我们使用构数注入，则所有构造函数参数都是必需的。
+请注意，如果我们使用构造函数注入，则所有构造函数参数都是强制性的。
 
-从4.3版本开始，我们不需要用@Autowired显式标注构造函数，除非我们至少声明了两个构造函数。
+从4.3版本开始，我们不需要显式地使用@Autowired标注构造函数，除非我们声明至少两个构造函数。
+
+有关更多详细信息，请访问我们关于[@Autowired](https://www.baeldung.com/spring-autowire)和[构造函数注入](https://www.baeldung.com/constructor-injection-in-spring)的文章。
 
 ### 2.2 @Bean
 
@@ -71,11 +75,11 @@ Engine getEngine() {
 }
 ```
 
-**注意，所有使用@Bean标注的方法都必须在@Configuration类中，否则不起作用**。
+注意，所有使用@Bean标注的方法都必须在@Configuration类中，否则不起作用。
 
 ### 2.3 @Qualifier
 
-**我们使用@Qualifier和@Autowired来提供在不明确的情况下要使用的bean id或bean名称**。
+我们使用@Qualifier和@Autowired来**提供在不明确的情况下要使用的bean id或bean名称**。
 
 例如，以下两个bean实现了相同的接口：
 
@@ -87,10 +91,9 @@ class Car implements Vehicle {
 }
 ```
 
-如果Spring需要注入一个Vehicle bean，它最终会找到多个匹配的Vehicle bean定义。
-在这种情况下，我们可以使用@Qualifier注解显式地提供bean的名称。
+如果Spring需要注入一个Vehicle bean，它最终会找到多个匹配的Vehicle bean定义。在这种情况下，我们可以使用@Qualifier注解显式提供bean的名称。
 
-使用构造注入：
+使用构造函数注入：
 
 ```java
 @Autowired
@@ -99,7 +102,7 @@ Biker(@Qualifier("bike") Vehicle vehicle) {
 }
 ```
 
-使用setter注入：
+使用Setter注入：
 
 ```java
 @Autowired
@@ -126,6 +129,8 @@ void setVehicle(Vehicle vehicle) {
 Vehicle vehicle;
 ```
 
+有关更详细的说明，请阅读[本文](https://www.baeldung.com/spring-autowire)。
+
 ### 2.4 @Required
 
 @Required在setter方法上标记我们希望通过XML填充的依赖项：
@@ -147,9 +152,9 @@ void setColor(String color) {
 
 ### 2.5 @Value
 
-我们可以使用@Value将属性值注入到bean中，它与构造、setter和字段注入兼容。
+我们可以使用[@Value](https://www.baeldung.com/spring-value-annotation)将属性值注入到bean中。它与构造函数、setter和字段注入兼容。
 
-构造注入：
+构造函数注入：
 
 ```java
 Engine(@Value("8") int cylinderCount) {
@@ -157,7 +162,7 @@ Engine(@Value("8") int cylinderCount) {
 }
 ```
 
-setter注入：
+Setter注入：
 
 ```java
 @Autowired
@@ -177,7 +182,7 @@ void setCylinderCount(int cylinderCount) {
 
 字段注入：
 
-```text
+```java
 @Value("8")
 int cylinderCount;
 ```
@@ -190,22 +195,22 @@ int cylinderCount;
 engine.fuelType=petrol
 ```
 
-我们可以使用以下内容注入engine.fuelType的值：
+我们可以通过以下方式注入engine.fuelType的值：
 
 ```java
 @Value("${engine.fuelType}")
 String fuelType;
 ```
 
-我们甚至可以在SpEL中使用@Value。
+我们甚至可以将SpEL和@Value结合使用。更多高级示例可以在我们关于[@Value](https://www.baeldung.com/spring-value-annotation)的文章中找到。
 
 ### 2.6 @DependsOn
 
-**我们可以使用这个注解让Spring在被标注的bean之前初始化其他bean**。通常，这种行为是自动的，基于bean之间的显式依赖关系。
+**我们可以使用这个注解让Spring在被标注的bean之前初始化其他bean**。通常，此行为是自动的，基于bean之间的显式依赖关系。
 
-**我们只有在依赖是隐式的时候才需要这个注解**，例如JDBC驱动加载或者静态变量初始化。
+**我们只有在依赖是隐式的时候才需要这个注解**，例如JDBC驱动程序加载或者静态变量初始化。
 
-我们可以在依赖类上使用@DependsOn来指定依赖bean的名称，注解的value参数需要一个包含依赖bean名称的数组：
+我们可以在指定依赖bean名称的依赖类上使用@DependsOn，注解的value参数需要一个包含依赖bean名称的数组：
 
 ```java
 @DependsOn("engine")
@@ -213,7 +218,7 @@ class Car implements Vehicle {
 }
 ```
 
-或者，如果我们用@Bean注解定义一个bean，工厂方法应该用@DependsOn注解：
+或者，如果我们使用@Bean注解定义一个bean，则工厂方法应该用@DependsOn注解：
 
 ```java
 @Bean
@@ -225,20 +230,20 @@ Engine engine() {
 
 ### 2.7 @Lazy
 
-**当我们想要惰性地初始化bean时，我们使用@Lazy**。默认情况下，Spring在应用程序上下文的启动/引导时急切地创建所有单例bean。
+**当我们想要惰性地初始化bean时，我们使用[@Lazy](https://www.baeldung.com/spring-lazy-annotation)**。默认情况下，Spring在应用程序上下文的启动/引导时急切地创建所有单例bean。
 
-**但是，在某些情况下，我们只需要在请求时才创建bean，而不是在应用程序启动时**。
+但是，**在某些情况下，我们只需要在请求时才创建bean，而不是在应用程序启动时**。
 
-这个注解的行为会根据我们准确放置的位置而有所不同。我们可以将它放置在：
+这个注解的行为会根据我们放置它的确切位置而有所不同。我们可以将它放置在：
 
-+ 一个@Bean注解的bean工厂方法，用于延迟方法调用(因此创建bean)。
-+ 一个@Configuration类，其中所有包含的@Bean方法都会受到影响。
-+ 一个@Component类，它不是一个@Configuration类，这个bean将被延迟初始化。
-+ @Autowired构造函数、setter或字段，用于延迟加载依赖项本身(通过代理)。
++ 一个@Bean标注的bean工厂方法，用于延迟方法调用(因此创建bean)
++ 一个@Configuration类，其中所有包含的@Bean方法都会受到影响
++ 一个@Component类，它不是@Configuration类，这个bean将被延迟初始化
++ @Autowired构造函数、setter或字段，用于延迟加载依赖项本身(通过代理)
 
 此注解有一个名为value的参数，默认值为true。覆盖默认行为很有用。
 
-例如，在全局设置为惰性时将bean标记为急切加载，或者在标有@Lazy的@Configuration类中配置特定的@Bean方法以急切加载：
+例如，在全局设置为惰性时将bean标记为急切加载，或者在标有@Lazy的@Configuration类中配置特定的@Bean方法为急切加载：
 
 ```java
 @Configuration
@@ -253,17 +258,21 @@ class VehicleFactoryConfig {
 }
 ```
 
+如需了解更多信息，请访问[这篇文章](https://www.baeldung.com/spring-lazy-annotation)。
+
 ### 2.8 @Lookup
 
-**使用@Lookup注解的方法告诉Spring在我们调用它时返回该方法的返回类型的实例**。
+**使用@Lookup标注的方法告诉Spring在我们调用它时返回该方法的返回类型的实例**。
+
+有关该注解的详细信息可以在[本文](https://www.baeldung.com/spring-lookup)中找到。
 
 ### 2.9 @Primary
 
 有时我们需要定义同一类型的多个bean。在这些情况下，注入将不成功，因为Spring不知道我们需要哪个bean。
 
-我们已经介绍了处理这种情况的一个方法：用@Qualifier标记所有注入点并指定所需bean的名称。
+我们已经看到了处理这种情况的一个方法：用@Qualifier标记所有注入点并指定所需bean的名称。
 
-然而，大多数时候我们需要一个特定的bean，而很少需要其他bean。我们可以使用@Primary来简化这种情况：如果我们用@Primary标记最常用的bean，它将在没有使用@Qualifier的注入点上被选中：
+但是，大多数时候我们需要一个特定的bean，而很少需要其他bean。我们可以使用@Primary来简化这种情况：如果我们**用@Primary标记最常用的bean**，它将在没有使用@Qualifier的注入点上被选中：
 
 ```java
 @Component
@@ -293,7 +302,7 @@ class Biker {
 
 ### 2.10 @Scope
 
-我们使用@Scope来定义@Component类或@Bean定义的作用域。它可以是单例、原型、request、session、globalSession或一些自定义作用域。
+我们使用@Scope来定义@Component类或@Bean定义的[作用域](https://www.baeldung.com/spring-bean-scopes)。它可以是singleton、prototype、request、session、globalSession或某些自定义作用域。
 
 例如：
 
@@ -310,8 +319,7 @@ class Engine {
 
 ### 3.1 @Profile
 
-如果我们希望Spring仅在特定的Profile处于激活状态时使用@Component类或@Bean方法，我们可以用@Profile标记它。
-我们可以使用注解的value参数配置Profile的名称：
+如果我们希望**Spring仅在特定的Profile处于激活状态时使用@Component类或@Bean方法**，我们可以用@Profile标记它。我们可以使用注解的value参数配置Profile的名称：
 
 ```java
 @Component
@@ -319,6 +327,8 @@ class Engine {
 class Bike implements Vehicle {
 }
 ```
+
+你可以在[本文](https://www.baeldung.com/spring-profiles)中阅读有关Profile的更多信息。
 
 ### 3.2 @Import
 
@@ -332,7 +342,7 @@ class VehicleFactoryConfig {
 
 ### 3.3 @ImportResource
 
-**我们可以使用此注解导入XML配置**，通过使用locations参数指定XML文件的位置，或者使用它的别名value参数：
+我们可以使用此注解**导入XML配置**。通过使用locations参数指定XML文件的位置，或者使用它的别名value参数：
 
 ```java
 @Configuration
@@ -343,7 +353,7 @@ class VehicleFactoryConfig {
 
 ### 3.4 @PropertySource
 
-**使用这个注解，我们可以定义包含应用程序配置的属性文件**：
+使用此注解，我们可以**定义包含应用程序配置的属性文件**：
 
 ```java
 @Configuration
@@ -369,14 +379,14 @@ class VehicleFactoryConfig {
 ```java
 @Configuration
 @PropertySources({
-        @PropertySource("classpath:/annotations.properties"),
-        @PropertySource("classpath:/vehicle-factory.properties")
+      @PropertySource("classpath:/annotations.properties"),
+      @PropertySource("classpath:/vehicle-factory.properties")
 })
 class VehicleFactoryConfig {
 }
 ```
 
-请注意，从Java 8开始，我们可以通过上述重复注解功能实现相同的功能。
+请注意，从Java 8开始，我们可以通过上述重复注解功能实现相同的目的。
 
 ## 4. 总结
 

@@ -4,9 +4,9 @@ Spring Boot提供了几种不同的方法来检查正在运行的应用程序及
 
 在本教程中，我们将熟悉这些API，了解它们的工作原理，并了解如何为它们提供自定义信息。
 
-## 2. 依赖关系
+## 2. 依赖
 
-健康信息是[Spring Boot Actuator]()模块的一部分，因此我们需要适当的[Maven依赖](https://search.maven.org/search?q=g:org.springframework.boot AND a:spring-boot-starter-actuator)：
+健康信息是[Spring Boot Actuator](https://www.baeldung.com/spring-boot-actuators)模块的一部分，因此我们需要适当的[Maven依赖](https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-actuator/3.0.5)：
 
 ```xml
 <dependency>
@@ -23,7 +23,7 @@ Spring Boot提供了几种不同的方法来检查正在运行的应用程序及
 
 **另一方面，Spring Boot有条件地注册了一些指标**。也就是说，如果类路径上存在某些依赖项或满足其他一些条件，Spring Boot也可能会注册其他一些HealthIndicator。例如，如果我们使用关系型数据库，那么Spring Boot会注册[DataSourceHealthIndicator](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/jdbc/DataSourceHealthIndicator.html)。同样，如果我们碰巧使用Cassandra作为我们的数据存储，它会注册[CassandraHealthIndicator](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/cassandra/CassandraHealthIndicator.html)。
 
-**为了检查Spring Boot应用程序的健康状态，我们可以调用/actuator/health端点**，此端点将报告所有已注册HealthIndicator的聚合结果。
+**为了检查Spring Boot应用程序的健康状态，我们可以调用/actuator/health端点**。此端点将报告所有已注册HealthIndicator的聚合结果。
 
 **此外，要查看某个特定指标的健康报告，我们可以调用/actuator/health/{name}端点**。例如，调用/actuator/health/diskSpace端点将从DiskSpaceHealthIndicator返回状态报告：
 
@@ -63,7 +63,7 @@ public class RandomHealthIndicator implements HealthIndicator {
 
 根据该指标的健康报告，应用程序应该只有90%的时间处于运行状态。在这里，我们使用[Health](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/Health.html)构建器来报告健康信息。
 
-**然而，在响应式应用程序中，我们应该注册一个类型为[ReactiveHealthIndicator](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/ReactiveHealthIndicator.html)的bean**，响应式health()方法返回[Mono]()而不是简单的Health。除此之外，其他细节对于两种Web应用程序类型都是相同的。
+**但是，在响应式应用程序中，我们应该注册一个类型为[ReactiveHealthIndicator](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/ReactiveHealthIndicator.html)的bean**。响应式health()方法返回[Mono<Health\>](https://www.baeldung.com/reactor-core#2-mono)而不是简单的Health。除此之外，其他细节对于两种Web应用程序类型都是相同的。
 
 ### 4.1 指标名称
 
@@ -75,7 +75,7 @@ public class RandomHealthIndicator implements HealthIndicator {
 }
 ```
 
-/actuator/health/random URL中的random是该指标的标识符，**特定HealthIndicator实现的标识符等于没有HealthIndicator后缀的bean名称**。由于bean名称是randomHealthIndicator，因此random前缀将是标识符。
+/actuator/health/random URL中的random是该指标的标识符。**特定HealthIndicator实现的标识符等于不带HealthIndicator后缀的bean名称**。由于bean名称是randomHealthIndicator，因此random前缀将是标识符。
 
 使用这个算法，如果我们将bean名称更改为rand：
 
@@ -90,7 +90,7 @@ public class RandomHealthIndicator implements HealthIndicator {
 
 ### 4.2 禁用指标
 
-**要禁用特定指标，我们可以将“management.health.<indicator_identifier>.enabled”配置属性设置为false**。例如，如果我们将以下内容添加到我们的application.properties中：
+**要禁用特定指标，我们可以将“management.health.<indicator_identifier\>.enabled”配置属性设置为false**。例如，如果我们将以下内容添加到我们的application.properties中：
 
 ```properties
 management.health.random.enabled=false
@@ -140,13 +140,13 @@ public Health health() {
     }
 
     return status
-      .withDetail("chance", chance)
-      .withDetail("strategy", "thread-local")
-      .build();
+        .withDetail("chance", chance)
+        .withDetail("strategy", "thread-local")
+        .build();
 }
 ```
 
-在这里，我们向状态报告添加了两条信息。此外，我们可以通过将Map<String, Object>传递给[withDetails(map)](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/Health.Builder.html#withDetail-java.lang.String-java.lang.Object-)方法来实现相同的目的：
+在这里，我们向状态报告添加了两条信息。此外，我们可以通过将Map<String, Object\>传递给[withDetails(map)](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/Health.Builder.html#withDetail-java.lang.String-java.lang.Object-)方法来实现相同的目的：
 
 ```java
 Map<String, Object> details = new HashMap<>();
@@ -172,12 +172,12 @@ return status.withDetails(details).build();
 
 ```java
 mockMvc.perform(get("/actuator/health/random"))
-      .andExpect(jsonPath("$.status").exists())
-      .andExpect(jsonPath("$.details.strategy").value("thread-local"))
-      .andExpect(jsonPath("$.details.chance").exists());
+    .andExpect(jsonPath("$.status").exists())
+    .andExpect(jsonPath("$.details.strategy").value("thread-local"))
+    .andExpect(jsonPath("$.details.chance").exists());
 ```
 
-有时在与数据库或磁盘等系统组件通信时会发生异常，我们可以使用[withException(ex)](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/Health.Builder.html#withException-java.lang.Throwable-)方法报告此类异常：
+有时在与数据库或磁盘等系统组件通信时会发生异常。我们可以使用[withException(ex)](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/Health.Builder.html#withException-java.lang.Throwable-)方法报告此类异常：
 
 ```java
 if (chance > 0.9) {
@@ -212,7 +212,7 @@ if (chance > 0.9) {
 
 例如，如果我们将此属性设置为always，那么Spring Boot将始终返回健康报告中的details字段，就像上面的示例一样。
 
-另一方面，**如果我们将此属性设置为never，那么Spring Boot将始终忽略输出中的详细信息**。还有一个when_authorized值，它只为授权用户公开额外的细节，当且仅当以下情况下，用户才获得授权：
+另一方面，**如果我们将此属性设置为never，那么Spring Boot将始终忽略输出中的details**。还有一个when_authorized值，它只为授权用户公开额外的details。当且仅当以下情况下，用户才获得授权：
 
 -   他已通过身份验证
 -   并且他拥有management.endpoint.health.roles配置属性中指定的角色
@@ -226,13 +226,13 @@ if (chance > 0.9) {
 -   OUT_OF_SERVICE：组件暂时停止服务
 -   UNKNOWN：组件状态未知
 
-这些状态被声明为[public static final](https://github.com/spring-projects/spring-boot/blob/310ef6e9995fab302f6af8b284d0a59ca0f212e9/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/Status.java#L43)实例而不是Java枚举，因此可以定义我们自己的自定义健康状态。为此，我们可以使用[status(name)](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/Health.Builder.html#status-java.lang.String-)方法：
+这些状态被声明为[public static final](https://github.com/spring-projects/spring-boot/blob/310ef6e9995fab302f6af8b284d0a59ca0f212e9/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/Status.java#L43)实例而不是Java枚举。因此可以定义我们自己的自定义健康状态。为此，我们可以使用[status(name)](https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/actuate/health/Health.Builder.html#status-java.lang.String-)方法：
 
 ```java
 Health.Builder warning = Health.status("WARNING");
 ```
 
-**健康状态会影响健康端点的HTTP状态码**，默认情况下，Spring Boot映射DOWN和OUT_OF_SERVICE状态以抛出503状态码。另一方面，UP和任何其他未映射的状态将被转换为200 OK状态码。
+**健康状态会影响健康端点的HTTP状态码**。默认情况下，Spring Boot映射DOWN和OUT_OF_SERVICE状态以抛出503状态码。另一方面，UP和任何其他未映射的状态将被转换为200 OK状态码。
 
 要自定义此映射，**我们可以将management.endpoint.health.status.http-mapping.<status\>配置属性设置为所需的HTTP状态码编号**：
 
@@ -246,8 +246,8 @@ management.endpoint.health.status.http-mapping.warning=500
 
 ```java
 mockMvc.perform(get("/actuator/health/warning"))
-      .andExpect(jsonPath("$.status").value("WARNING"))
-      .andExpect(status().isInternalServerError());
+    .andExpect(jsonPath("$.status").value("WARNING"))
+    .andExpect(status().isInternalServerError());
 ```
 
 同样，**我们可以注册一个[HttpCodeStatusMapper](https://docs.spring.io/spring-boot/docs/2.2.3.RELEASE/api/org/springframework/boot/actuate/health/HttpCodeStatusMapper.html)类型的bean来自定义HTTP状态码映射**：
@@ -289,9 +289,9 @@ if (status.getCode().equals("WARNING")) {
 
 重要的应用程序通常包含几个不同的组件。例如，考虑一个使用Cassandra作为数据库、Apache Kafka作为其发布-订阅平台以及Hazelcast作为其内存数据网格的Spring Boot应用程序。
 
-**我们应该使用HealthIndicator来查看应用程序是否可以与这些组件通信**，如果通信链路出现故障或组件本身出现故障或速度变慢，那么我们应该注意一个不健康的组件。换句话说，这些指标应该用于报告不同组件或子系统的健康状况。
+**我们应该使用HealthIndicator来查看应用程序是否可以与这些组件通信**。如果通信链路出现故障或组件本身出现故障或速度变慢，那么我们应该注意一个不健康的组件。换句话说，这些指标应该用于报告不同组件或子系统的健康状况。
 
-相反，我们应该避免使用HealthIndicator来测量值、计数事件或测量持续时间，这就是为什么我们有指标。简而言之，**指标是报告CPU使用率、平均负载、堆大小、HTTP响应分布等的更好工具**。
+相反，我们应该避免使用HealthIndicator来测量值、计数事件或测量持续时间。这就是为什么我们有指标。简而言之，**指标是报告CPU使用率、平均负载、堆大小、HTTP响应分布等的更好工具**。
 
 ## 6. 总结
 

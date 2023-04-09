@@ -1,29 +1,29 @@
-## 一、概述
+## 1. 概述
 
-在本教程中，我们会将基本指标集成到 Spring REST API中。
+在本教程中，我们**将基本指标集成到Spring REST API中**。
 
-我们将首先使用简单的 Servlet 过滤器构建指标功能，然后使用Spring BootActuator 模块。
+我们将首先使用简单的Servlet过滤器构建指标功能，然后使用Spring Boot Actuator模块。
 
-## 2.web.xml _
+## 2. web.xml
 
-让我们首先注册一个过滤器——“ MetricFilter ”——到我们应用程序的web.xml中：
+让我们首先注册一个过滤器“MetricFilter”到我们应用程序的web.xml中：
 
 ```xml
 <filter>
     <filter-name>metricFilter</filter-name>
-    <filter-class>org.baeldung.metrics.filter.MetricFilter</filter-class>
+    <filter-class>cn.tuyucheng.taketoday.metrics.filter.MetricFilter</filter-class>
 </filter>
 <filter-mapping>
     <filter-name>metricFilter</filter-name>
-    <url-pattern>/</url-pattern>
+    <url-pattern>/*</url-pattern>
 </filter-mapping>
 ```
 
-请注意我们如何映射过滤器以涵盖所有传入的请求—— “/” ——这当然是完全可配置的。
+请注意我们如何映射过滤器以涵盖所有传入的请求-“/*”，这当然是完全可配置的。
 
 ## 3. Servlet过滤器
 
-现在 - 让我们创建我们的自定义过滤器：
+现在-让我们创建我们的自定义过滤器：
 
 ```java
 public class MetricFilter implements Filter {
@@ -33,13 +33,12 @@ public class MetricFilter implements Filter {
     @Override
     public void init(FilterConfig config) throws ServletException {
         metricService = (MetricService) WebApplicationContextUtils
-                .getRequiredWebApplicationContext(config.getServletContext())
-                .getBean("metricService");
+              .getRequiredWebApplicationContext(config.getServletContext())
+              .getBean("metricService");
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws java.io.IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws java.io.IOException, ServletException {
         HttpServletRequest httpRequest = ((HttpServletRequest) request);
         String req = httpRequest.getMethod() + " " + httpRequest.getRequestURI();
 
@@ -51,13 +50,13 @@ public class MetricFilter implements Filter {
 }
 ```
 
-由于过滤器不是标准 bean，我们不打算注入metricService而是通过ServletContext手动检索它。
+由于过滤器不是标准bean，因此我们不会注入metricService，而是通过ServletContext手动检索它。
 
-另请注意，我们通过在此处调用doFilter API 来继续执行过滤器链。
+另请注意，我们通过在此处调用doFilter API来继续执行过滤器链。
 
-## 4. 指标——状态码计数
+## 4. 指标-状态码计数
 
-接下来——让我们看一下简单的InMemoryMetricService：
+接下来，让我们看一下简单的InMemoryMetricService：
 
 ```java
 @Service
@@ -68,7 +67,7 @@ public class MetricService {
     public MetricService() {
         statusMetric = new ConcurrentHashMap<>();
     }
-    
+
     public void increaseCount(String request, int status) {
         Integer statusCount = statusMetric.get(status);
         if (statusCount == null) {
@@ -84,9 +83,9 @@ public class MetricService {
 }
 ```
 
-我们使用内存中的ConcurrentMap来保存每种类型的 HTTP 状态代码的计数。
+我们使用内存中的ConcurrentMap来保存每种类型的HTTP状态代码的计数。
 
-现在——为了显示这个基本指标——我们将把它映射到一个Controller方法：
+现在，为了显示这个基本指标-我们将把它映射到一个Controller方法：
 
 ```java
 @GetMapping(value = "/status-metric")
@@ -98,17 +97,17 @@ public Map getStatusMetric() {
 
 这是一个示例响应：
 
-```bash
-{  
-    "404":1,
-    "200":6,
-    "409":1
+```json
+{
+    "404": 1,
+    "200": 6,
+    "409": 1
 }
 ```
 
-## 5. 指标——请求的状态代码
+## 5. 指标-请求的状态代码
 
-接下来——让我们记录 Counts by Request 的指标：
+接下来-**让我们按请求记录计数的指标**：
 
 ```java
 @Service
@@ -138,7 +137,7 @@ public class MetricService {
 }
 ```
 
-我们将通过 API 显示指标结果：
+我们将通过API显示指标结果：
 
 ```java
 @GetMapping(value = "/metric")
@@ -150,39 +149,36 @@ public Map getMetric() {
 
 以下是这些指标的样子：
 
-```bash
+```json
 {
-    "GET /users":
-    {
-        "200":6,
-        "409":1
+    "GET /users": {
+        "200": 6,
+        "409": 1
     },
-    "GET /users/1":
-    {
-        "404":1
+    "GET /users/1": {
+        "404": 1
     }
 }
 ```
 
-根据以上示例，API 具有以下活动：
+根据以上示例，API具有以下活动：
 
--   “7”个请求“GET /users ”
--   其中“6”个导致“200”状态代码响应，只有一个在“409”中
+-   7个请求“GET /users”
+-   其中6个导致“200”状态代码响应，只有1个返回“409”
 
-## 6. Metric——时间序列数据
+## 6. 指标-时间序列数据
 
-总体计数在应用程序中有些用处，但如果系统已经运行了很长时间——就很难说出这些指标的实际含义。
+总体计数在应用程序中有些用处，但如果系统已经运行了很长时间-就**很难说出这些指标的实际含义**。
 
 你需要当时的背景才能使数据有意义并易于解释。
 
-现在让我们构建一个简单的基于时间的指标；我们将记录每分钟的状态码计数——如下所示：
+现在让我们构建一个简单的基于时间的指标；我们将记录每分钟的状态码计数-如下所示：
 
 ```java
 @Service
 public class MetricService {
 
-    private static final SimpleDateFormat DATE_FORMAT = 
-      new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private Map<String, Map<Integer, Integer>> timeMap;
 
     public void increaseCount(String request, int status) {
@@ -233,16 +229,16 @@ public Object[][] getGraphData() {
         }
         i++;
     }
-
-
-    对于 (int k = 1; k < result[0].length; k++) {
-        结果[0][k] = 结果[0][k].toString();
+    
+    for (int k = 1; k < result[0].length; k++) {
+        result[0][k] = result[0][k].toString();
     }
-   return result; 
+
+    return result; 
 }
 ```
 
-我们现在将其映射到 API：
+我们现在将其映射到API：
 
 ```java
 @GetMapping(value = "/metric-graph-data")
@@ -252,15 +248,15 @@ public Object[][] getMetricData() {
 }
 ```
 
-最后——我们将使用 Google Charts 将其呈现出来：
+最后-我们将使用Google Charts将其呈现出来：
 
 ```html
 <html>
 <head>
-<title>Metric Graph</title>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
+    <title>Metric Graph</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
 google.load("visualization", "1", {packages : [ "corechart" ]});
 
 function drawChart() {
@@ -279,16 +275,16 @@ $.get("/metric-graph-data",function(mydata) {
 </script>
 </head>
 <body onload="drawChart()">
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+<div id="chart_div" style="width: 900px; height: 500px;"></div>
 </body>
 </html>
 ```
 
-## 7. 使用Spring Boot1.x 执行器
+## 7. 使用Spring Boot 1.x Actuator
 
-在接下来的几节中，我们将连接到Spring Boot中的 Actuator 功能来展示我们的指标。
+在接下来的几节中，我们将连接到Spring Boot中的Actuator功能来展示我们的指标。
 
-首先——我们需要将执行器依赖项添加到我们的pom.xml中：
+首先-我们需要将Actuator依赖项添加到我们的pom.xml中：
 
 ```xml
 <dependency>
@@ -297,9 +293,9 @@ $.get("/metric-graph-data",function(mydata) {
 </dependency>
 ```
 
-### 7.1. 指标过滤器
+### 7.1 MetricFilter
 
-接下来——我们可以将MetricFilter——变成一个实际的 Spring bean：
+接下来-我们可以将MetricFilter变成一个实际的Spring bean：
 
 ```java
 @Component
@@ -309,8 +305,7 @@ public class MetricFilter implements Filter {
     private MetricService metricService;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
-      throws java.io.IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws java.io.IOException, ServletException {
         chain.doFilter(request, response);
 
         int status = ((HttpServletResponse) response).getStatus();
@@ -319,9 +314,9 @@ public class MetricFilter implements Filter {
 }
 ```
 
-当然，这是一个很小的简化——但是为了摆脱以前手动连接依赖关系而值得做的一个简化。
+当然，这是一个很小的简化，但是为了摆脱以前手动注入依赖关系而值得做的一个简化。
 
-### 7.2. 使用柜台服务
+### 7.2 使用CounterService
 
 现在让我们使用CounterService来计算每个状态代码的出现次数：
 
@@ -343,9 +338,9 @@ public class MetricService {
 }
 ```
 
-### 7.3. 使用MetricRepository导出指标
+### 7.3 使用MetricRepository导出指标
 
-接下来——我们需要导出指标——使用MetricRepository：
+接下来，我们需要导出指标-使用MetricRepository：
 
 ```java
 @Service
@@ -356,7 +351,7 @@ public class MetricService {
 
     private List<List<Integer>> statusMetric;
     private List<String> statusList;
-    
+
     @Scheduled(fixedDelay = 60000)
     private void exportMetrics() {
         Metric<?> metric;
@@ -375,13 +370,13 @@ public class MetricService {
 }
 ```
 
-请注意，我们正在存储每分钟状态代码的计数。
+请注意，我们存储的是**每分钟的状态代码计数**。
 
-### 7.4. Spring Boot公共指标
+### 7.4 Spring Boot PublicMetrics
 
-我们还可以使用Spring BootPublicMetrics来导出指标，而不是使用我们自己的过滤器——如下所示：
+我们还可以使用Spring Boot PublicMetrics来导出指标，而不是使用我们自己的过滤器-如下所示：
 
-首先，我们有每分钟导出指标的计划任务：
+首先，我们有计划的任务来**导出每分钟的指标**：
 
 ```java
 @Autowired
@@ -401,7 +396,7 @@ private void exportMetrics() {
 }
 ```
 
-当然，我们需要初始化 HTTP 状态代码列表：
+当然，我们需要初始化HTTP状态代码列表：
 
 ```java
 private List<Integer> initializeStatuses(int size) {
@@ -413,11 +408,10 @@ private List<Integer> initializeStatuses(int size) {
 }
 ```
 
-然后我们将使用状态代码计数实际更新指标：
+然后我们将使用**状态代码计数**实际更新指标：
 
 ```java
 private void updateMetrics(Metric<?> counterMetric, List<Integer> statusCount) {
-
     if (counterMetric.getName().contains("counter.status.")) {
         String status = counterMetric.getName().substring(15, 18); // example 404, 200
         appendStatusIfNotExist(status, statusCount);
@@ -437,10 +431,10 @@ private void appendStatusIfNotExist(String status, List<Integer> statusCount) {
 
 注意：
 
--   PublicMetics状态计数器名称以“ counter.status ”开头，例如“ counter.status.200.root ”
+-   PublicMetrics状态计数器名称以“counter.status”开头，例如“counter.status.200.root”
 -   我们在列表statusMetricsByMinute中记录每分钟的状态计数
 
-我们可以导出收集到的数据以将其绘制成图表——如下所示：
+**我们可以导出收集到的数据以将其绘制成图表**-如下所示：
 
 ```java
 public Object[][] getGraphData() {
@@ -457,8 +451,7 @@ public Object[][] getGraphData() {
     }
 
     for (int i = 1; i < rowCount; i++) {
-        result[i][0] = dateFormat.format(
-          new Date(current.getTime() - (60000L  (rowCount - i))));
+        result[i][0] = dateFormat.format(new Date(current.getTime() - (60000L * (rowCount - i))));
     }
 
     List<Integer> minuteOfStatuses;
@@ -467,8 +460,7 @@ public Object[][] getGraphData() {
     for (int i = 1; i < rowCount; i++) {
         minuteOfStatuses = statusMetricsByMinute.get(i - 1);
         for (j = 1; j <= minuteOfStatuses.size(); j++) {
-            result[i][j] = 
-              minuteOfStatuses.get(j - 1) - (last.size() >= j ? last.get(j - 1) : 0);
+            result[i][j] = minuteOfStatuses.get(j - 1) - (last.size() >= j ? last.get(j - 1) : 0);
         }
         while (j < colCount) {
             result[i][j] = 0;
@@ -480,9 +472,9 @@ public Object[][] getGraphData() {
 }
 ```
 
-### 7.5. 使用指标绘制图形
+### 7.5 使用指标绘制图形
 
-最后——让我们通过一个二维数组来表示这些指标——这样我们就可以将它们绘制成图表：
+最后，让我们通过一个二维数组来表示这些指标-这样我们就可以将它们绘制成图表：
 
 ```java
 public Object[][] getGraphData() {
@@ -501,8 +493,7 @@ public Object[][] getGraphData() {
     ArrayList<Integer> temp;
     for (int i = 1; i < rowCount; i++) {
         temp = statusMetric.get(i - 1);
-        result[i][0] = dateFormat.format
-          (new Date(current.getTime() - (60000L  (rowCount - i))));
+        result[i][0] = dateFormat.format(new Date(current.getTime() - (60000L * (rowCount - i))));
         for (j = 1; j <= temp.size(); j++) {
             result[i][j] = temp.get(j - 1);
         }
@@ -528,7 +519,7 @@ public Object[][] getMetricData() {
 
 这是一个示例响应：
 
-```bash
+```json
 [
     ["Time","counter.status.302","counter.status.200","counter.status.304"],
     ["2015-03-26 19:59",3,12,7],
@@ -536,13 +527,13 @@ public Object[][] getMetricData() {
 ]
 ```
 
-## 8. 使用Spring Boot2.x 执行器
+## 8. 使用Spring Boot 2.x Actuator
 
-在Spring Boot2 中，Spring Actuator 的 API 发生了重大变化。Spring 自己的指标已被[Micrometer](https://www.baeldung.com/micrometer)取代。因此，让我们使用Micrometer编写上面相同的指标示例。
+在Spring Boot 2中，Spring Actuator的API发生了重大变化。**Spring自己的指标已被[Micrometer](https://www.baeldung.com/micrometer)取代**。因此，让我们使用Micrometer编写上面相同的指标示例。
 
-### 8.1. 用MeterRegistry替换CounterService
+### 8.1 用MeterRegistry替换CounterService
 
-由于我们的Spring Boot应用程序已经依赖于 Actuator 启动器，因此 Micrometer 已经自动配置。我们可以注入MeterRegistry而不是CounterService。我们可以使用不同类型的Meter来捕获指标。计数器是仪表之一：
+由于我们的Spring Boot应用程序已经依赖于Actuator启动器，因此Micrometer已经自动配置。我们可以注入MeterRegistry而不是CounterService。我们可以使用不同类型的Meter来捕获指标。计数器是Meters之一：
 
 ```java
 @Autowired
@@ -560,43 +551,43 @@ public void increaseCount(int status) {
 }
 ```
 
-### 8.2. 查看自定义指标
+### 8.2 查看自定义指标
 
-由于我们的指标现在已在 Micrometer 注册，首先，让我们[在应用程序配置中启用它们](https://www.baeldung.com/spring-boot-actuator-enable-endpoints#3-enabling-specific-endpoints)。现在我们可以通过导航到位于/actuator/metrics的 Actuator 端点来查看它们：
-
-```json
-{
-  "names": [
-    "application.ready.time",
-    "application.started.time",
-    "counter.status.200",
-    "disk.free",
-    "disk.total",
-    .....
-  ]
-}
-```
-
-在这里我们可以看到我们的counter.status.200指标列在标准执行器指标中。此外，我们还可以通过在 URI 中提供选择器/actuator/metrics/counter.status.200来获取该指标的最新值：
+由于我们的指标现在已在Micrometer注册，因此首先，让我们在[应用程序配置](https://www.baeldung.com/spring-boot-actuator-enable-endpoints#3-enabling-specific-endpoints)中启用它们。现在我们可以通过导航到位于/actuator/metrics的Actuator端点来查看它们：
 
 ```json
 {
-  "name": "counter.status.200",
-  "description": null,
-  "baseUnit": null,
-  "measurements": [
-    {
-      "statistic": "COUNT",
-      "value": 2
-    }
-  ],
-  "availableTags": []
+    "names": [
+        "application.ready.time",
+        "application.started.time",
+        "counter.status.200",
+        "disk.free",
+        "disk.total",
+        .....
+    ]
 }
 ```
 
-### 8.3. 使用MeterRegistry导出计数
+在这里我们可以看到我们的counter.status.200指标列在标准执行器指标中。此外，我们还可以通过在URI中提供选择器/actuator/metrics/counter.status.200来获取该指标的最新值：
 
-在 Micrometer 中，我们可以使用MeterRegistry导出计数器值：
+```json
+{
+    "name": "counter.status.200",
+    "description": null,
+    "baseUnit": null,
+    "measurements": [
+        {
+            "statistic": "COUNT",
+            "value": 2
+        }
+    ],
+    "availableTags": []
+}
+```
+
+### 8.3 使用MeterRegistry导出计数
+
+在Micrometer中，我们可以使用MeterRegistry导出计数器值：
 
 ```java
 @Scheduled(fixedDelay = 60000)
@@ -616,15 +607,15 @@ private void exportMetrics() {
 }
 ```
 
-### 8.3. 使用仪表发布指标
+### 8.4 使用Meters发布指标
 
-现在我们还可以使用MeterRegistry 的 Meters 发布指标：
+现在我们还可以使用MeterRegistry的Meters发布指标：
 
 ```java
 @Scheduled(fixedDelay = 60000)
 private void exportMetrics() {
     List<Integer> lastMinuteStatuses = initializeStatuses(statusList.size());
-
+    
     for (Meter counterMetric : publicMetrics.getMeters()) {
         updateMetrics(counterMetric, lastMinuteStatuses);
     }
@@ -643,10 +634,10 @@ private void updateMetrics(Meter counterMetric, List<Integer> statusCount) {
 }
 ```
 
-## 9.总结
+## 9. 总结
 
-在本文中，我们探讨了几种将一些基本指标功能构建到 Spring Web 应用程序中的简单方法。
+在本文中，我们探讨了几种将一些基本指标功能构建到Spring Web应用程序中的简单方法。
 
-请注意，计数器不是线程安全的——因此如果不使用原子序数之类的东西，它们可能不准确。这是故意的，只是因为增量应该很小，而且 100% 的准确度不是目标——相反，及早发现趋势才是。
+请注意，**计数器不是线程安全的**-因此如果不使用原子类之类的东西，它们可能不准确。这是故意的，只是因为增量应该很小，而且100%的准确度不是目标-相反，及早发现趋势才是。
 
-当然，还有更成熟的方法可以在应用程序中记录 HTTP 指标，但这是一种简单、轻量级且超级有用的方法，无需使用成熟工具的额外复杂性。
+当然，还有更成熟的方法可以在应用程序中记录HTTP指标，但这是一种简单、轻量级且超级有用的方法，无需使用成熟工具的额外复杂性。

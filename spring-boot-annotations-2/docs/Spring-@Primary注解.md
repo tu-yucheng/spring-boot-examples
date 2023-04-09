@@ -1,6 +1,6 @@
 ## 1. 概述
 
-在本文中，我们将介绍Spring的@Primary注解，它是在3.0版本中引入的。
+在这个快速教程中，我们将讨论Spring的@Primary注解，它是在3.0版本中引入的。
 
 简单地说，**当有多个相同类型的bean时，我们可以使用@Primary给一个bean更高的优先级**。
 
@@ -8,10 +8,9 @@
 
 在某些情况下，**我们需要注册多个相同类型的bean**。
 
-假设我们定义了两个Employee类型的bean：
+在此示例中，我们有Employee类型的JohnEmployee()和TonyEmployee() beans：
 
 ```java
-
 @Configuration
 @ComponentScan(basePackages = "cn.tuyucheng.taketoday.primary")
 public class Config {
@@ -26,20 +25,13 @@ public class Config {
         return new Employee("Tony");
     }
 }
-
-@Data
-@AllArgsConstructor
-public class Employee {
-
-    private final String name;
-}
 ```
 
-**如果我们尝试获取Employee bean，Spring会抛出NoUniqueBeanDefinitionException**。
+**如果我们尝试运行应用程序，Spring将抛出NoUniqueBeanDefinitionException**。
 
 要访问具有相同类型的bean，我们通常使用@Qualifier("beanName")注解。
 
-我们将它与@Autowired结合使用。在我们的例子中，我们在配置阶段选择了bean，所以@Qualifier不能在这里应用。
+我们将它与@Autowired一起应用于注入点。在我们的例子中，我们在配置阶段选择了bean，因此不能在此处应用@Qualifier。
 
 为了解决这个问题，Spring提供了@Primary注解。
 
@@ -48,9 +40,7 @@ public class Employee {
 让我们看一下配置类：
 
 ```java
-
 @Configuration
-@ComponentScan(basePackages = "cn.tuyucheng.taketoday.primary")
 public class Config {
 
     @Bean
@@ -66,7 +56,7 @@ public class Config {
 }
 ```
 
-**我们用@Primary标记tonyEmployee()方法。Spring将优先注入tonyEmployee bean，而不是johnEmployee**。
+**我们用@Primary标记tonyEmployee() bean。Spring将优先注入tonyEmployee bean，而不是johnEmployee**。
 
 现在，让我们启动应用程序上下文并从中获取Employee bean：
 
@@ -83,7 +73,7 @@ public class PrimaryApplication {
 
 运行应用程序后，控制台的输出如下：
 
-```
+```shell
 Employee{name='Tony'}
 ```
 
@@ -100,7 +90,6 @@ public interface Manager {
 我们有一个Manager接口和两个子类bean，DepartmentManager：
 
 ```java
-
 @Component
 public class DepartmentManager implements Manager {
 
@@ -111,10 +100,9 @@ public class DepartmentManager implements Manager {
 }
 ```
 
-和GeneralManager bean：
+GeneralManager bean：
 
 ```java
-
 @Primary
 @Component
 public class GeneralManager implements Manager {
@@ -128,21 +116,18 @@ public class GeneralManager implements Manager {
 
 它们都重写了Manager接口的getManagerName()方法。另外，请注意我们用@Primary标记了GeneralManager bean。
 
-这一次，**@Primary仅在我们启用组件扫描时才有意义**：
+这一次，**@Primary只有在我们启用组件扫描时才有意义**：
 
 ```java
-
 @Configuration
 @ComponentScan(basePackages = "cn.tuyucheng.taketoday.primary")
 public class Config {
-
 }
 ```
 
-让我们创建一个Service类来注入Manager类型的bean：
+让我们创建一个服务类来注入Manager类型的bean：
 
 ```java
-
 @Service
 public class ManagerService {
 
@@ -160,15 +145,9 @@ public class ManagerService {
 **当我们用@Primary标记GeneralManager bean时，它将被选择用于依赖注入**：
 
 ```java
-public class PrimaryApplication {
-
-    public static void main(String[] args) {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
-        ManagerService service = context.getBean(ManagerService.class);
-        Manager manager = service.getManager();
-        System.out.println(manager.getManagerName());
-    }
-}
+ManagerService service = context.getBean(ManagerService.class);
+Manager manager = service.getManager();
+System.out.println(manager.getManagerName());
 ```
 
 运行以上程序，控制台的输出是“General manager”。

@@ -1,12 +1,12 @@
 ## 1. 概述
 
-在本教程中，我们学习如何在[Spring Boot Actuator]()中启用所有端点，看看如何通过我们的属性文件来控制我们的端点。最后，我们将概述如何保护我们的端点。
+在本教程中，我们将学习如何在[Spring Boot Actuator](https://www.baeldung.com/spring-boot-actuators)中启用所有端点，看看如何通过我们的属性文件来控制我们的端点。最后，我们将概述如何保护端点。
 
-就Actuator端点的配置方式而言，[Spring Boot 1.x和Spring Boot 2.x之间]()发生了一些变化。
+就Actuator端点的配置方式而言，[Spring Boot 1.x和Spring Boot 2.x之间](https://www.baeldung.com/spring-boot-actuators)发生了一些变化。
 
 ## 2. 设置
 
-为了使用Actuator，我们需要在我们的Maven配置中包含[spring-boot-starter-actuator](https://search.maven.org/artifact/org.springframework.boot/spring-boot-starter-actuator)：
+为了使用Actuator，我们需要在我们的Maven配置中包含[spring-boot-starter-actuator](https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-actuator/3.0.5)：
 
 ```xml
 <dependency>
@@ -16,7 +16,7 @@
 </dependency>
 ```
 
-此外，从Spring Boot 2.0开始，**如果我们希望通过HTTP公开端点，我们需要包含[web starter](https://search.maven.org/artifact/org.springframework.boot/spring-boot-starter-web)**：
+此外，从Spring Boot 2.0开始，**如果我们希望通过HTTP公开端点，我们需要包含[Web启动器](https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-web/3.0.3)**：
 
 ```xml
 <dependency>
@@ -30,9 +30,9 @@
 
 从Spring Boot 2开始，**我们必须启用并公开我们的端点**。默认情况下，启用除/shutdown之外的所有端点，并且仅公开/health和/info。所有端点都可以在/actuator中找到，即使我们为应用程序配置了不同的根上下文也是如此。
 
-这意味着一旦我们将适当的starter依赖项添加到我们的Maven配置中，我们就可以在http://localhost:8080/actuator/health和http://localhost:8080/actuator/info访问/health和/info端点。
+这意味着一旦我们将适当的启动器依赖项添加到Maven配置中，我们就可以在[http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)和[http://localhost:8080/actuator/info](http://localhost:8080/actuator/info)访问/health和/info端点。
 
-让我们访问http://localhost:8080/actuator并查看可用端点列表，因为Actuator端点已启用HATEOS，我们应该看到/health和/info。
+让我们访问[http://localhost:8080/actuator](http://localhost:8080/actuator)并查看可用端点列表，因为Actuator端点已启用HATEOS，我们应该看到/health和/info。
 
 ```json
 {
@@ -61,7 +61,7 @@
 management.endpoints.web.exposure.include=*
 ```
 
-重新启动我们的服务器并再次访问/actuator端点，我们应该看到除/shutdown之外的其他可用端点：
+重新启动我们的服务器并再次访问/actuator端点后，我们应该看到除/shutdown之外的其他可用端点：
 
 ```json
 {
@@ -136,14 +136,14 @@ management.endpoints.web.exposure.include属性也可以采用逗号分隔的端
 management.endpoints.web.exposure.include=beans,loggers
 ```
 
-除了在属性中包含某些端点之外，我们还可以排除端点。下面我们公开除/threaddump之外的所有端点：
+除了在属性中包含某些端点之外，我们还可以排除端点。让我们公开除/threaddump之外的所有端点：
 
 ```properties
 management.endpoints.web.exposure.include=*
 management.endpoints.web.exposure.exclude=threaddump
 ```
 
-include和exclude属性都接收端点列表，**exclude属性优先于include**。
+include和exclude属性都接收端点列表。**exclude属性优先于include**。
 
 ### 3.3 启用特定端点
 
@@ -184,7 +184,7 @@ curl -X POST http://localhost:8080/actuator/shutdown
 
 在实际应用程序中，我们很可能会对应用程序添加安全性。考虑到这一点，让我们保护我们的Actuator端点。
 
-首先，我们通过添加[security starter](https://search.maven.org/search?q=g:org.springframework.boot AND a:spring-boot-starter-security) Maven依赖项来为我们的应用程序添加安全性：
+首先，让我们通过添加[Security启动器](https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-security/3.0.3)Maven依赖项来为我们的应用程序添加安全性：
 
 ```xml
 <dependency>
@@ -194,11 +194,11 @@ curl -X POST http://localhost:8080/actuator/shutdown
 </dependency>
 ```
 
-对于最基本的安全性，这就是我们所要做的。只需添加security starter，我们就自动将基本身份验证应用于除/info和/health之外的所有公开端点。
+对于最基本的安全性，这就是我们所要做的。只需添加Security启动器，我们就自动将基本身份验证应用于除/info和/health之外的所有公开端点。
 
-现在，让我们自定义我们的安全性以将/actuator端点限制为ADMIN角色。
+现在，让我们自定义安全性，以将/actuator端点限制为ADMIN角色。
 
-首先从排除默认安全配置开始：
+首先我们从排除默认安全配置开始：
 
 ```java
 @SpringBootApplication(exclude = { 

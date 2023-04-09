@@ -2,19 +2,19 @@
 
 Spring Boot应用程序可以具有复杂的组件图、启动阶段和资源初始化步骤。
 
-在本文中，我们将了解**如何通过[Spring Boot Actuator]()端点跟踪和监视此启动信息**。
+在本文中，我们将了解**如何通过[Spring Boot Actuator](https://www.baeldung.com/spring-boot-actuators)端点跟踪和监视此启动信息**。
 
 ## 2. 应用程序启动跟踪
 
-跟踪应用程序启动期间的各个步骤可以提供有用的信息，可以帮助我们**了解应用程序启动的各个阶段所花费的时间**，这种检测还可以**提高我们对上下文生命周期和应用程序启动顺序的理解**。
+跟踪应用程序启动期间的各个步骤可以提供有用的信息，可以帮助我们**了解应用程序启动的各个阶段所花费的时间**。这种检测还可以**提高我们对上下文生命周期和应用程序启动顺序的理解**。
 
-[Spring框架]()提供了[记录应用程序启动](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#context-functionality-startup)和图形初始化的功能。此外，Spring Boot Actuator通过HTTP或JMX提供了多种生产级监控和管理功能。
+[Spring框架](https://www.baeldung.com/spring-intro)提供了[记录应用程序启动](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#context-functionality-startup)和图形初始化的功能。此外，Spring Boot Actuator通过HTTP或JMX提供了多种生产级监控和管理功能。
 
 从[Spring Boot 2.4](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.4-Release-Notes#startup-endpoint)开始，**应用程序启动跟踪指标现在可以通过/actuator/startup端点获得**。
 
 ## 3. 设置
 
-要启用Spring Boot Actuator，让我们将[spring-boot-starter-actuator](https://search.maven.org/artifact/org.springframework.boot/spring-boot-starter-actuator)依赖项添加到我们的POM中：
+要启用Spring Boot Actuator，让我们将[spring-boot-starter-actuator](https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-actuator/3.0.3)依赖项添加到我们的POM中：
 
 ```xml
 <dependency>
@@ -24,7 +24,7 @@ Spring Boot应用程序可以具有复杂的组件图、启动阶段和资源初
 </dependency>
 ```
 
-我们还将添加[spring-boot-starter-web](https://search.maven.org/artifact/org.springframework.boot/spring-boot-starter-web)依赖项，因为这是通过HTTP访问端点所必需的：
+我们还将添加[spring-boot-starter-web](https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-starter-web/3.0.3)依赖项，因为这是通过HTTP访问端点所必需的：
 
 ```xml
 <dependency>
@@ -40,19 +40,19 @@ Spring Boot应用程序可以具有复杂的组件图、启动阶段和资源初
 management.endpoints.web.exposure.include=startup
 ```
 
-最后，我们分别使用[curl](https://man7.org/linux/man-pages/man1/curl.1.html)和[jq]()查询Actuator HTTP端点并解析JSON响应。
+最后，我们分别使用[curl](https://man7.org/linux/man-pages/man1/curl.1.html)和[jq](https://www.baeldung.com/linux/jq-command-json)查询Actuator HTTP端点并解析JSON响应。
 
 ## 4. Actuator端点
 
-为了捕获启动事件，我们需要使用@ApplicationStartup接口的实现来配置我们的应用程序。默认情况下，用于管理应用程序生命周期的ApplicationContext使用空操作实现，这显然不执行任何启动检测和跟踪，从而将开销降至最低。
+为了捕获启动事件，我们需要使用@ApplicationStartup接口的实现来配置我们的应用程序。默认情况下，用于管理应用程序生命周期的ApplicationContext使用空操作实现。这显然不执行任何启动检测和跟踪，从而将开销降至最低。
 
 因此，**与其他Actuator端点不同，我们需要一些额外的设置**。
 
 ### 4.1 使用BufferingApplicationStartup
 
-我们需要将应用程序的启动配置设置为BufferingApplicationStartup的一个实例，这是Spring Boot提供的ApplicationStartup接口的内存中实现，**它捕获Spring启动过程中的事件并将它们存储在内部缓冲区中**。
+我们需要将应用程序的启动配置设置为BufferingApplicationStartup的一个实例，这是Spring Boot提供的ApplicationStartup接口的内存中实现。**它捕获Spring启动过程中的事件并将它们存储在内部缓冲区中**。
 
-让我们从为我们的应用程序使用此实现创建一个简单的应用程序开始：
+让我们首先使用以下实现创建一个简单的应用程序：
 
 ```java
 @SpringBootApplication
@@ -72,7 +72,7 @@ public class StartupTrackingApplication {
 
 ### 4.2 startup端点
 
-现在，我们可以启动我们的应用程序并查询startup Actuator端点。
+现在，我们可以启动应用程序并查询startup Actuator端点。
 
 让我们使用curl调用此POST端点并使用jq格式化JSON输出：
 
@@ -127,7 +127,7 @@ public class StartupTrackingApplication {
 }
 ```
 
-正如我们所见，详细的JSON响应包含一个检测启动事件列表。**它包含有关每个步骤的各种详细信息，例如步骤名称、开始时间、结束时间以及步骤计时详细信息**。有关响应结构的详细信息，请参阅[Spring Boot Actuator Web API](https://docs.spring.io/spring-boot/docs/current/actuator-api/htmlsingle/#startup)文档。
+正如我们所见，详细的JSON响应包含检测的启动事件列表。**它包含有关每个步骤的各种详细信息，例如步骤名称、开始时间、结束时间以及步骤计时详细信息**。有关响应结构的详细信息，请参阅[Spring Boot Actuator Web API](https://docs.spring.io/spring-boot/docs/current/actuator-api/htmlsingle/#startup)文档。
 
 此外，核心容器中定义的完整步骤列表以及有关每个步骤的更多详细信息可在[Spring参考文档](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#application-startup-steps)中找到。
 
@@ -137,7 +137,7 @@ public class StartupTrackingApplication {
 
 ### 4.3 过滤启动事件
 
-正如我们所见，缓冲实现具有固定的容量用于在内存中存储事件。因此，可能不希望在缓冲区中存储大量事件。
+正如我们所见，缓冲实现具有用于在内存中存储事件的固定容量。因此，可能不希望在缓冲区中存储大量事件。
 
 我们可以过滤检测到的事件，并只存储我们可能感兴趣的事件：
 
@@ -160,10 +160,10 @@ startup.addFilter(startupStep -> startupStep.getName().matches("spring.beans.ins
 
 我们可以像以前一样调用端点，但这一次，我们将使用jq处理输出。
 
-由于响应非常冗长，我们过滤与名称spring.beans.instantiate匹配的步骤，并按持续时间对它们进行排序：
+由于响应非常冗长，让我们过滤与名称spring.beans.instantiate匹配的步骤，并按持续时间对它们进行排序：
 
 ```shell
-> curl 'http://localhost:8080/actuator/startup' -X POST 
+> curl 'http://localhost:8080/actuator/startup' -X POST \
 | jq '[.timeline.events
  | sort_by(.duration) | reverse[]
  | select(.startupStep.name | match("spring.beans.instantiate"))
@@ -196,12 +196,14 @@ startup.addFilter(startupStep -> startupStep.getName().matches("spring.beans.ins
 ]
 ```
 
-在这里，我们可以看到resourceInitializer bean在启动过程中花费了大约6秒，这可能被认为是对整个应用程序启动时间的重要持续时间。使用这种方法，**我们可以有效地识别这个问题并专注于进一步调查和可能的解决方案**。
+在这里，我们可以看到resourceInitializer bean在启动过程中花费了大约6秒。这可能被认为是对整个应用程序启动时间的重要持续时间。使用这种方法，**我们可以有效地识别这个问题并专注于进一步调查和可能的解决方案**。
 
-请务必注意，**ApplicationStartup仅供在应用程序启动期间使用。换句话说，它不会取代用于应用程序检测的Java分析器和指标收集框架**。
+请务必注意，**ApplicationStartup仅供在应用程序启动期间使用**。**换句话说，它不会取代用于应用程序检测的Java分析器和指标收集框架**。
 
 ## 6. 总结
 
 在本文中，我们研究了如何在Spring Boot应用程序中获取和分析详细的启动指标。
 
-首先，我们了解了如何启用和配置Spring Boot Actuator端点；然后，我们查看了从该端点获得的有用信息。最后，我们通过一个例子来分析这些信息，以便更好地理解应用程序启动过程中的各个步骤。
+首先，我们了解了如何启用和配置Spring Boot Actuator端点。然后，我们查看了从该端点获得的有用信息。
+
+最后，我们通过一个例子来分析这些信息，以便更好地理解应用程序启动过程中的各个步骤。

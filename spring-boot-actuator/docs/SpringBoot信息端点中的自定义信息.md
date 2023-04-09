@@ -2,11 +2,11 @@
 
 在这篇快速文章中，我们将了解如何自定义Spring Boot Actuators的/info端点。
 
-请参阅[本文]()以了解有关Boot中的Actuator以及如何配置它们的更多信息。
+请参阅[本文](https://www.baeldung.com/spring-boot-actuators)以了解有关Boot中的Actuator以及如何配置它们的更多信息。
 
 ## 2. /info中的静态属性
 
-如果我们有一些静态信息，例如应用程序的名称或长时间不变的版本，那么最好将这些详细信息添加到我们的application.properties文件中：
+如果我们有一些静态信息，例如应用程序的名称或长时间不变的版本号，那么最好将这些详细信息添加到我们的application.properties文件中：
 
 ```properties
 ## Configuring info endpoint
@@ -15,7 +15,7 @@ info.app.description=This is my first Spring Boot application
 info.app.version=1.0.0
 ```
 
-这就是我们在/info端点上提供此数据所需做的全部工作，Spring会自动将所有以info为前缀的属性添加到/info端点：
+这就是我们在/info端点上提供此数据所需做的全部工作。Spring会自动将所有以info为前缀的属性添加到/info端点：
 
 ```json
 {
@@ -74,9 +74,9 @@ public class TotalUsersInfoContributor implements InfoContributor {
 }
 ```
 
-第一件事是我们需要将实现类标记为@Component，然后将所需的详细信息添加到提供给contribute()方法的Info.Builder实例。
+第一件事是我们需要将实现类标记为@Component。然后将所需的详细信息添加到提供给contribute()方法的Info.Builder实例。
 
-这种方法为我们提供了很多关于我们可以向/info端点公开的内容的灵活性：
+这种方法为我们可以向/info端点公开的内容提供了很大的灵活性：
 
 ```json
 {
@@ -93,4 +93,4 @@ public class TotalUsersInfoContributor implements InfoContributor {
 
 在本教程中，我们介绍了将自定义数据添加到/info端点的各种方法。
 
-请注意，在另一篇文章中我们还讨论了如何将[git信息]()添加到/info端点。
+请注意，在另一篇文章中我们还讨论了如何将[git信息](https://www.baeldung.com/spring-git-information)添加到/info端点。
