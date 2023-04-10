@@ -1,4 +1,4 @@
-package com.baeldung.springbootreact.domain;
+package cn.tuyucheng.taketoday.springbootreact.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

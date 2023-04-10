@@ -1,7 +1,7 @@
-package com.baeldung.springbootreact;
+package cn.tuyucheng.taketoday.springbootreact;
 
-import com.baeldung.springbootreact.domain.Client;
-import com.baeldung.springbootreact.repository.ClientRepository;
+import cn.tuyucheng.taketoday.springbootreact.domain.Client;
+import cn.tuyucheng.taketoday.springbootreact.repository.ClientRepository;
 import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

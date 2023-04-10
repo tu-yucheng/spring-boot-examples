@@ -1,7 +1,7 @@
-package com.baeldung.springbootreact.controller;
+package cn.tuyucheng.taketoday.springbootreact.controller;
 
-import com.baeldung.springbootreact.domain.Client;
-import com.baeldung.springbootreact.repository.ClientRepository;
+import cn.tuyucheng.taketoday.springbootreact.domain.Client;
+import cn.tuyucheng.taketoday.springbootreact.repository.ClientRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
